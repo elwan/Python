@@ -1,0 +1,5 @@
+import csv
+with open ('upload_file_test.csv',newline='') as f:
+    reader = csv.reader(f)
+    for row in reader:
+        print(row)

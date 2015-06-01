@@ -1,0 +1,3 @@
+id,account_id/id,credit,debit,journal_id/id,period_id/id,ref,name,x_numerofacture,move_id/id,date
+__export__.account_move_line_23,__export__.account_account_42,800000.0,,__export__.account_journal_10,__export__.account_period_19,,facture de courant mois de mai,,EXJ/2015/0005,2015-05-29
+__export__.account_move_line_24,__export__.account_account_42,,800000.0,__export__.account_journal_10,__export__.account_period_19,,facture de courant mois de mai,,EXJ/2015/0005,2015-05-29
