@@ -1,5 +1,6 @@
 #-*-encoding: utf-8 -*-
 #-*-encoding:latin-1-*-
+#cvs process to make right csv file for uploading journal item in odoo
 import csv
 
 
@@ -17,5 +18,3 @@ with open ('Test_Fichier_Upload_KFK_1.csv',newline='',encoding='utf8') as f:
         #    print ("Ok")
         #else:
         #    print("NOK")
-            
-        
