@@ -1,0 +1,45 @@
+import datetime, time
+
+class Employee(object):
+    def __init__(self,name,prenom,age,date_debut,code):
+        self.nom=name
+        self.prenom=prenom
+        self.age=age
+        self.date_debut=''
+        self.attendance_in=0
+        self.attendance_out=0
+        self.attendance_mois=''
+        self.attendance_annee=''
+        self.code=''
+        
+
+    def is_in(self):
+        temps_arrivee = time()
+        self.attendance_in =temps_arrivee
+        return temps_arrivee
+    def is_out(self):
+        temps_sortie = time()
+        self.attendance_out =temps_sortie
+        return temps_sortie
+    def log():
+        pass
+
+    def affiche_temps():
+        if temps_sortie > Temps_arrivee:
+            pointage= temps_sortie - temps_arrivee
+        print( "temps de votre shift est de: {} ".format(pointage))
+
+
+test=Employee("Ndiaye","elwan",27,'01/11/2014',"elwan7")
+test.is_in()
+time.sleep(20)
+test.is_out()
+test.affiche_temps()
+        
+
+
+        
+        
+        
+        
+        
