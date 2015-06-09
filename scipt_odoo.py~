@@ -1,0 +1,27 @@
+import csv, datetime,sys
+
+class Ecriture_Comptable (object):
+    def __init__(self,journal,debit,credit,compte):
+        self.journal=journal
+        self.debit=debit
+        self.credit=credit
+        self.compte=compte
+        self.valide=0
+    def valider(self):
+        pass
+    def ecrire_new_csv(self):
+        pass
+    def ecrire_dans_log(self):
+        pass
+    def verifier_compte(self):
+        pass
+
+class NbAppel(object):
+    def __init__(self,fonction):
+        self.fonction=fonction
+        self.appel=0
+    def __call__(self,*args):
+        self.appel=self.appel +1
+        return self.fonction(*args)
+
+
