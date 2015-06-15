@@ -6,18 +6,32 @@ import csv, datetime,sys, json
 
 #creer un objet pour chaque entree faire des verfiction sur les entrees et si tout semble ok on valide pour le faire passer en ecriture vers le nouveau fichier et ensuite le mettre dans les logs 
 class Ecriture_Comptable (object):
-    def __init__(self,journal,debit,credit,compte):
-        self.journal=journal
-        self.debit=debit
-        self.credit=credit
-        self.compte=compte
+    
+    def __init__(self,ligne):
+        self.journal=ligne["CJ"]
+        self.debit=ligne[" Montant Débit "]
+        self.credit=ligne[" Montant Crédit "]
+        self.compte_general=ligne["N Compte Général"]
+        self.compte_tiers=ligne["N Compte Tiers"]
+        self.libelle=ligne["Libellés"]
+        self.date=ligne["Date"]
+        self.reference=["Référence"]
+        self.num_facture=ligne["N Facture"]
+        self.num_piece=ligne["N de piéce"]
         self.valide=0
+        
     def valider(self):
+        
         pass
     def ecrire_new_csv(self):
+        
         pass
-    def ecrire_dans_log(self):
-        pass
+    def ecrire_dans_log(self,error_log):
+        with open("odoo.log","a") as f :
+            #f.writelines(srt(i))
+            f.writelines("-"+"#" * 50 +'\n')
+            f.writelines(Error_log+'\n')
+            
     def verifier_correspondance(self,element,fichier):
        #dict_journaux = Import_Fichier("journaux.json").importer()
        dict_elements =Import_Fichier(fichier).importer()
@@ -50,19 +64,18 @@ class Import_Fichier(object):
         #   self.liste_values.append(values)
         #return self.liste_values
         
-    class Import_csv_file(object):
-        def __init__(self,fichier):
-            self.fichier=fichier
+class Import_Csv_File(object):
+        def __init__(self):
+            #self.fichier=fichier
             self.liste_values=[]
-        def importer(self):
-            with open(self.fichier,'r') as f:
-               dico= csv.DictReader(f)
-            for items in dico:
-                self.liste_values.append(items)
-            return self.liste_values #retourner une liste de dictionnaire
-                       
-            
+            self.dico={}
+        def importer(self,fichier):
+            with open(fichier,'r') as f:
+                self.dico = csv.DictReader(f)
+                for row in self.dico:
+                    self.liste_values.append(row)
+            return self.liste_values #retourne une liste de dictionnaire contenant les elements
+                                   
 #print( type(Import_Fichier("file.json").importer()))
-
-            
-        
+t = Import_Csv_File().importer("Test_Fichier_Upload_KFK_1.csv")
+print (t)
