@@ -19,17 +19,39 @@ class Ecriture_Comptable (object):
         self.num_facture=ligne["N Facture"]
         self.num_piece=ligne["N de piéce"]
         self.valide=0
-        self.fichier_journal=""
-        self.fichier_compte_general="code+nom compte ohada.csv"
-        self.fichier_compte_tier=""
+        self.fichier_journal="journal.csv"
+        self.fichier_compte_general="compte_general.csv"
+        self.fichier_compte_tier="compte_tiers.csv"
         
+    def si_renseigner(self):#les valeurs ci-dessous sont obligatoires et doivent tjrs etre renseignes 
+        liste_averifier={'journal':self.journal,'date':self.date,'compte general':self.compte_general,'Numero de piece':self.num_piece,'Libelle':self.libelle}
+        for key,values in liste_averifier.items():
+            if values is '':
+                print ("{} est obligatoire et doit etre renseigner".format(key))
+            else:
+                return True
+            
+    def si_montant_est_correcte(self): # si debit est null credit doit avoir une valeur a 0 et visversa  
+        eviter=['',0] #controler si les valeurs ne sont pas null ou egale a zero
+        if self.debit in eviter  and self.credit in eviter :
+            self.ecrire_dans_log("credit ou debit ne doivent pas etre null")
+        elif self.debit not in eviter  and self.credit  not in eviter:
+            self.ecrire_dans_log("credit ou debit ne doivent pas avoir des valeurs en meme temps ")
+        else: 
+            return True
+    
+                
     def valider(self):
-        print(self.journal,self.credit,self.libelle,self.compte_tiers,self.compte_general)
+        print(self.journal,self.credit,self.libelle,self.compte_tiers,self.compte_general,self.compte_tiers,self.date,self.num_piece,self.debit)
         
         pass
     def ecrire_new_csv(self):
-        
-        pass
+        with open("new_fichier.cvs","a") as f :
+            fieldnames = ['','','','','','','','','','','']
+            writer = csv.DictReader(f,fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerow({})
+
     def ecrire_dans_log(self,error_log):
         with open("odoo.log","a") as f :
             #f.writelines(srt(i))
@@ -47,29 +69,37 @@ class Ecriture_Comptable (object):
        #        return False
        #verifier la correspondance des journaux,comptes et si la ligne contient une valeur dans debit ou credit.
        #verification du journal
-       #correspondance(self.journal,fichier_journal,"journal")
+       v1=self.correspondance(self.journal,self.fichier_journal,"journal")
        #verfiercation compte genral
-       self.correspondance(self.compte_general,self.fichier_compte_general,"compte general")
+       v2=self.correspondance(self.compte_general,self.fichier_compte_general,"compte general")
        #verification compte tiers
        #correspondance(self.compte_tiers,fichier_compte_tier,"compte tiers")
        #verification  validite debit ou credit
-       if self.debit==0 and self.credit==0 :
-           self.ecrire_dans_log("balance incorrecte")
-       else:
+       #if self.debit==0 and self.credit==0 :
+       #    self.ecrire_dans_log("credit ou debit ne doivent pas etre null")
+       #elif self.debit!=  and self.credit !=0:
+       #    self.ecrire_dans_log("credit ou debit ne doivent pas avoir des valeurs en meme temps ")
+       # else:
+       #     return True
+       if v1 and v2 :
+           
            return True
        
     def correspondance(self,element,fichier,nature):
         """ Element pour l'objet a verifier ,fichier pour l'object csv a verifier et nature pour differencier un peu la nature des objet a verifier (compte tiers,compte general et journal)"""
-        with open(fichier,'r') as f:
-            for e in csv.DictReader(f):
-                if element==e["code"]:
-                    return True
-                else:
-                    self.ecrire_dans_log("le code "+nature+"est innexistant"+element)
-        
-
-                    
-
+        self.fichier=fichier
+        self.element=element
+        self.nature=nature
+        self.liste=[]
+        with open(self.fichier,'r') as f:
+            t=csv.DictReader(f)
+            for e in t:
+                self.liste.append(e['code'])
+            if self.element in self.liste:
+                return True
+            else:
+                self.ecrire_dans_log(" le code  "+self.nature+" "+self.element+" est innexistant")
+                return False
 #un decorateur pour compter le nombre de fois que une fonction a ete appeler  utile pour compter le nombre d'instance qu'on a traitee 
 class NbAppel(object):
     def __init__(self,fonction):
@@ -105,8 +135,8 @@ class Import_Csv_File(object):
                                    
 #print( type(Import_Fichier("file.json").importer()))
 t0 = Import_Csv_File("Test_Fichier_Upload_KFK_1.csv").importer()
-o=Ecriture_Comptable(t0[2])
-if o.verifier_correspondance():
+o=Ecriture_Comptable(t0[0])
+if o.si_renseigner() and o.si_montant_est_correcte() and o.verifier_correspondance():
     o.valider()
 #t1 = Import_Csv_File("code+nom compte ohada.csv").importer()
 #for i in t1:
@@ -114,9 +144,6 @@ if o.verifier_correspondance():
     #print(str(y)+'\n')
  #   print (i["code"])
     #y+=1
-
-
-    
     
 
 
