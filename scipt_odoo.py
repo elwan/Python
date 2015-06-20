@@ -8,6 +8,7 @@ import csv, datetime,sys, json
 class Ecriture_Comptable (object):
     
     def __init__(self,ligne):
+        
         self.journal=ligne["CJ"]
         self.debit=ligne[" Montant Débit "]
         self.credit=ligne[" Montant Crédit "]
@@ -32,7 +33,7 @@ class Ecriture_Comptable (object):
                 return True
             
     def si_montant_est_correcte(self): # si debit est null credit doit avoir une valeur a 0 et visversa  
-        eviter=['',0] #controler si les valeurs ne sont pas null ou egale a zero
+        eviter={'',0} #controler si les valeurs ne sont pas null ou egale a zero
         if self.debit in eviter  and self.credit in eviter :
             self.ecrire_dans_log("credit ou debit ne doivent pas etre null")
         elif self.debit not in eviter  and self.credit  not in eviter:
@@ -43,7 +44,6 @@ class Ecriture_Comptable (object):
                 
     def valider(self):
         print(self.journal,self.credit,self.libelle,self.compte_tiers,self.compte_general,self.compte_tiers,self.date,self.num_piece,self.debit)
-        
         pass
     def ecrire_new_csv(self):
         with open("new_fichier.cvs","a") as f :
@@ -59,30 +59,15 @@ class Ecriture_Comptable (object):
             f.writelines(error_log+'\n')
             
     def verifier_correspondance(self):
-       #dict_journaux = Import_Fichier("journaux.json").importer()
-       #dict_elements =Import_Fichier(fichier).importer()
-       #dict_compte_tier=Import_Fichier("compte_tiers.json").importer()
-       #for  items  in dict_elements.keys():
-       #    if  element == items :
-        #       return True
-       #    else:
-       #        return False
-       #verifier la correspondance des journaux,comptes et si la ligne contient une valeur dans debit ou credit.
+       """verifier la correspondance des journaux,comptes generaux et tiers """
        #verification du journal
        v1=self.correspondance(self.journal,self.fichier_journal,"journal")
        #verfiercation compte genral
        v2=self.correspondance(self.compte_general,self.fichier_compte_general,"compte general")
        #verification compte tiers
        #correspondance(self.compte_tiers,fichier_compte_tier,"compte tiers")
-       #verification  validite debit ou credit
-       #if self.debit==0 and self.credit==0 :
-       #    self.ecrire_dans_log("credit ou debit ne doivent pas etre null")
-       #elif self.debit!=  and self.credit !=0:
-       #    self.ecrire_dans_log("credit ou debit ne doivent pas avoir des valeurs en meme temps ")
-       # else:
-       #     return True
+       #verification
        if v1 and v2 :
-           
            return True
        
     def correspondance(self,element,fichier,nature):
@@ -95,7 +80,7 @@ class Ecriture_Comptable (object):
             t=csv.DictReader(f)
             for e in t:
                 self.liste.append(e['code'])
-            if self.element in self.liste:
+            if self.element in set(self.liste):
                 return True
             else:
                 self.ecrire_dans_log(" le code  "+self.nature+" "+self.element+" est innexistant")
@@ -109,7 +94,8 @@ class NbAppel(object):
         self.appel=self.appel +1
         return self.fonction(*args)
 
-class Import_Fichier(object): #lire un fichier json et retourne un dictionnaire
+class Import_Json(object): #lire un fichier json et retourne un dictionnaire
+    """ Lire un fichier json et renvoyer les elemens dans un  dictionnaire """
     def __init__(self,fichier):
         self.fichier=fichier
         #self.liste_values=[]
@@ -122,15 +108,17 @@ class Import_Fichier(object): #lire un fichier json et retourne un dictionnaire
         #return self.liste_values
         
 class Import_Csv_File(object):
-        def __init__(self,fichier):
-            self.fichier=fichier
-            self.liste_values=[]
+    
+    """ Lire un fichier CSV et renvoyer une liste de dictionnaire contenant les elements de chaque ligne """
+    def __init__(self,fichier):
+        self.fichier=fichier
+        self.liste_values=[]
             #self.dico={}
-        def importer(self):
-            with open(self.fichier,'r') as f:
-               # self.dico = csv.DictReader(f)
-                for row in csv.DictReader(f):
-                    self.liste_values.append(row)
+    def importer(self):
+        with open(self.fichier,'r') as f:
+        # self.dico = csv.DictReader(f)
+            for row in csv.DictReader(f):
+                self.liste_values.append(row)
             return self.liste_values #retourne une liste de dictionnaire contenant les elements
                                    
 #print( type(Import_Fichier("file.json").importer()))
