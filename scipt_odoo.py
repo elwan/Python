@@ -22,7 +22,8 @@ class Ecriture_Comptable (object):
         self.valide=0
         self.fichier_journal="journal.csv"
         self.fichier_compte_general="compte_general.csv"
-        self.fichier_compte_tier="compte_tiers.csv"
+        self.fichier_compte_si_tier="si_compte_tiers.csv"
+        self.fichier_compte_tier =" "
         
     def si_renseigner(self):#les valeurs ci-dessous sont obligatoires et doivent tjrs etre renseignes 
         liste_averifier={'journal':self.journal,'date':self.date,'compte general':self.compte_general,'Numero de piece':self.num_piece,'Libelle':self.libelle}
@@ -85,6 +86,36 @@ class Ecriture_Comptable (object):
             else:
                 self.ecrire_dans_log(" le code  "+self.nature+" "+self.element+" est innexistant")
                 return False
+
+    def si_compte_tiers(self):
+        """Verifier si compte compte general  est ossociee a un compte tiers et vefifier si le compte tiers associer au compte general existe """
+        self.liste=[]
+        self.vide={'',0}
+        with open(self.fichier_compte_si_tier,'r') as f:
+            t=csv.DictReader(f)
+            for e in t :
+                self.liste.append(e['code'])
+            if self.compte_general in set(self.liste):
+                if self.compte_tiers is self.vide:
+                    print (" compte tiers ne doit pas etre Vide ou Null ")
+                else:
+                    return True
+            else:
+                return False
+    def si_compte_tier_existe(self):
+        """ verifier si le compte tier associer au compte general existe """
+        self.liste=[]
+        with open(self.fichier_compte_tier,'r') as f :
+            t = csv.DictReader(f)
+            for e in t :
+                self.liste.append(e['code'])
+            if self.compte_tiers in set(self.liste):
+                return True
+            else:
+                return False
+                
+                  
+                  
 #un decorateur pour compter le nombre de fois que une fonction a ete appeler  utile pour compter le nombre d'instance qu'on a traitee 
 class NbAppel(object):
     def __init__(self,fonction):
@@ -124,7 +155,9 @@ class Import_Csv_File(object):
 #print( type(Import_Fichier("file.json").importer()))
 t0 = Import_Csv_File("Test_Fichier_Upload_KFK_1.csv").importer()
 o=Ecriture_Comptable(t0[0])
-if o.si_renseigner() and o.si_montant_est_correcte() and o.verifier_correspondance():
+if o.si_renseigner() and o.si_montant_est_correcte() and o.verifier_correspondance() and o.si_compte_tiers():
+    print("compte tiers")
+else:
     o.valider()
 #t1 = Import_Csv_File("code+nom compte ohada.csv").importer()
 #for i in t1:
