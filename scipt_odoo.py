@@ -23,7 +23,8 @@ class Ecriture_Comptable (object):
         self.fichier_journal="journal.csv"
         self.fichier_compte_general="compte_general.csv"
         self.fichier_compte_si_tier="si_compte_tiers.csv"
-        self.fichier_compte_tier =" "
+        self.fichier_compte_tier ="compte_tiers.csv"
+        self.fichier_correspondance_compte_tiers="correspondance_compte_tiers.csv"
         
     def si_renseigner(self):#les valeurs ci-dessous sont obligatoires et doivent tjrs etre renseignes 
         liste_averifier={'journal':self.journal,'date':self.date,'compte general':self.compte_general,'Numero de piece':self.num_piece,'Libelle':self.libelle}
@@ -39,10 +40,25 @@ class Ecriture_Comptable (object):
             self.ecrire_dans_log("credit ou debit ne doivent pas etre null")
         elif self.debit not in eviter  and self.credit  not in eviter:
             self.ecrire_dans_log("credit ou debit ne doivent pas avoir des valeurs en meme temps ")
-        else: 
+        else:
             return True
-    
-                
+    def si_valeur_est_positive(self):
+        """ verifier si montant est correcte avant  de verifier  la negativite de la valeur
+retourne vrai si la valeur est positive et retourne faux si la valeur est negative  """
+        
+        if len(self.debit) > 0:#voir d'abord  si la ligne n'est pas vide 
+            if self.debit[0] is '-':#on test si le premier caractere est un signe negatif 
+                self.ecrire_dans_log("Valeur de debit ne doit pas etre negative")
+                return False
+            else:
+                return True
+        else:
+            if self.credit[0] is '-':
+                self.ecrire_dans_log("valeur de debit ne doit pas etre negative")
+                return False
+            else:
+                return True
+                           
     def valider(self):
         print(self.journal,self.credit,self.libelle,self.compte_tiers,self.compte_general,self.compte_tiers,self.date,self.num_piece,self.debit)
         pass
@@ -60,7 +76,7 @@ class Ecriture_Comptable (object):
             f.writelines(error_log+'\n')
             
     def verifier_correspondance(self):
-       """verifier la correspondance des journaux,comptes generaux et tiers """
+       """verifier la correspondance des journaux et des comptes generaux  """
        #verification du journal
        v1=self.correspondance(self.journal,self.fichier_journal,"journal")
        #verfiercation compte genral
@@ -88,34 +104,59 @@ class Ecriture_Comptable (object):
                 return False
 
     def si_compte_tiers(self):
-        """Verifier si compte compte general  est ossociee a un compte tiers et vefifier si le compte tiers associer au compte general existe """
+        """ Verifier si compte compte general  est ossociee a un compte tiers et vefifier si le compte tiers associer au compte general existe """
         self.liste=[]
         self.vide={'',0}
         with open(self.fichier_compte_si_tier,'r') as f:
-            t=csv.DictReader(f)
-            for e in t :
-                self.liste.append(e['code'])
-            if self.compte_general in set(self.liste):
-                if self.compte_tiers is self.vide:
-                    print (" compte tiers ne doit pas etre Vide ou Null ")
-                else:
-                    return True
-            else:
-                return False
-    def si_compte_tier_existe(self):
-        """ verifier si le compte tier associer au compte general existe """
-        self.liste=[]
-        with open(self.fichier_compte_tier,'r') as f :
             t = csv.DictReader(f)
             for e in t :
                 self.liste.append(e['code'])
-            if self.compte_tiers in set(self.liste):
-                return True
+            if self.compte_general in set(self.liste):
+                if self.compte_tiers in self.vide:
+                    self.ecrire_dans_log("Compte tiers doit etre obligatoirement renseigner")
+                    return False
+                else:
+                    if self.correspondance(self.compte_tiers,self.fichier_compte_tier,"Compte tiers"):
+                         #return True
+                        if self.si_compte_tiers_correspond():
+                          return True
+                        else:
+                            self.ecrire_dans_log("Correspondance compte tiers compte generale invalide ")
+                            return False
+                    else:
+                        #self.ecrire_dans_log("La valeur du  compte tier est invalide ")
+                        return False
             else:
-                return False
+                return True 
+    
+    #def si_compte_tier_existe(self):
+    #    """ verifier si le compte tier associer au compte general existe """
+    #    self.liste=[]
+    #    with open(self.fichier_compte_tier,'r') as f :
+    #        t = csv.DictReader(f)
+    #        for e in t :
+    #            self.liste.append(e['code'])
+    #        if self.compte_tiers in set(self.liste):
+    #            return True
+    #        else:
+    #            return False
+    def si_compte_tiers_correspond(self):
+        """ verifie si le compte tiers est asssocie au bon compte general dans la configuration de odoo"""
+        self.test =[self.compte_tiers,self.compte_general]
+        self.petit_liste=[]
+        #self.grand_liste=[]
+        with open(self.fichier_correspondance_compte_tiers,'r') as f:
+            t=csv.reader(f)
+            next(t) #sauter le header
+            for e in t :
+                self.petit_liste.append(e[:-1]) #recuper une partie de la liste et sauter le dernier element
                 
-                  
-                  
+        if [a for a in self.petit_liste if set(self.test)==set(a)]: #comparer les deux ensembles et revoi le couple (cpte tiers compte general si la comparaison est vrai 
+            return True
+        else:
+            return False
+        
+                
 #un decorateur pour compter le nombre de fois que une fonction a ete appeler  utile pour compter le nombre d'instance qu'on a traitee 
 class NbAppel(object):
     def __init__(self,fonction):
@@ -154,11 +195,26 @@ class Import_Csv_File(object):
                                    
 #print( type(Import_Fichier("file.json").importer()))
 t0 = Import_Csv_File("Test_Fichier_Upload_KFK_1.csv").importer()
-o=Ecriture_Comptable(t0[0])
-if o.si_renseigner() and o.si_montant_est_correcte() and o.verifier_correspondance() and o.si_compte_tiers():
-    print("compte tiers")
-else:
-    o.valider()
+o=Ecriture_Comptable(t0[45])
+#print(o.si_compte_tiers_correspond())
+#o.valider()
+#print ("OK")
+
+if o.si_renseigner() and o.si_montant_est_correcte() and o.verifier_correspondance():
+    
+    if o.si_valeur_est_positive():
+        if o.si_compte_tiers():
+            print("compte tiers")
+            o.valider()
+        else:
+            print("pas de compte tiers")
+            o.valider()
+    else:
+        print("pas de valeur negative")
+    
+
+#else:
+#    o.valider()
 #t1 = Import_Csv_File("code+nom compte ohada.csv").importer()
 #for i in t1:
     #y=1
