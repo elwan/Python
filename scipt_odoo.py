@@ -195,7 +195,7 @@ class Import_Csv_File(object):
                                    
 #print( type(Import_Fichier("file.json").importer()))
 t0 = Import_Csv_File("Test_Fichier_Upload_KFK_1.csv").importer()
-o=Ecriture_Comptable(t0[45])
+o=Ecriture_Comptable(t0[100])
 #print(o.si_compte_tiers_correspond())
 #o.valider()
 #print ("OK")
@@ -211,16 +211,12 @@ if o.si_renseigner() and o.si_montant_est_correcte() and o.verifier_correspondan
             o.valider()
     else:
         print("pas de valeur negative")
+
+        
     
 
-#else:
-#    o.valider()
-#t1 = Import_Csv_File("code+nom compte ohada.csv").importer()
-#for i in t1:
-    #y=1
-    #print(str(y)+'\n')
- #   print (i["code"])
-    #y+=1
+
+
     
 
 
