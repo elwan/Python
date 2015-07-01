@@ -25,7 +25,7 @@ class Ecriture_Comptable (object):
         self.fichier_compte_si_tier="si_compte_tiers.csv"
         self.fichier_compte_tier ="compte_tiers.csv"
         self.fichier_correspondance_compte_tiers="correspondance_compte_tiers.csv"
-        
+        self.ligne_retourne=ligne 
     def si_renseigner(self):#les valeurs ci-dessous sont obligatoires et doivent tjrs etre renseignes 
         liste_averifier={'journal':self.journal,'date':self.date,'compte general':self.compte_general,'Numero de piece':self.num_piece,'Libelle':self.libelle}
         for key,values in liste_averifier.items():
@@ -45,7 +45,6 @@ class Ecriture_Comptable (object):
     def si_valeur_est_positive(self):
         """ verifier si montant est correcte avant  de verifier  la negativite de la valeur
 retourne vrai si la valeur est positive et retourne faux si la valeur est negative  """
-        
         if len(self.debit) > 0:#voir d'abord  si la ligne n'est pas vide 
             if self.debit[0] is '-':#on test si le premier caractere est un signe negatif 
                 self.ecrire_dans_log("Valeur de debit ne doit pas etre negative")
@@ -60,11 +59,26 @@ retourne vrai si la valeur est positive et retourne faux si la valeur est negati
                 return True
                            
     def valider(self):
-        print(self.journal,self.credit,self.libelle,self.compte_tiers,self.compte_general,self.compte_tiers,self.date,self.num_piece,self.debit)
-        pass
+        #print(self.journal,self.credit,self.libelle,self.compte_tiers,self.compte_general,self.compte_tiers,self.date,self.num_piece,self.debit)
+        #pass
+        if self.si_renseigner() and self.si_montant_est_correcte() and self.verifier_correspondance():
+    
+            if self.si_valeur_est_positive():
+                if self.si_compte_tiers():
+                    #print("compte tiers")
+                    #o.valider()
+                    return self.ligne_retourne
+                else:
+                    #print("pas de compte tiers")
+                    #o.valider()
+                    return self.ligne_retourne
+            else:
+                print("pas de valeur negative")
+
+        
     def ecrire_new_csv(self):
         with open("new_fichier.cvs","a") as f :
-            fieldnames = ['','','','','','','','','','','']
+            fieldnames = ['id','date','journal','name','period','line_id/account_id','line_id/name','line_id/debit','line_id/credit','line_id/x_numerofacture','ref','partner']
             writer = csv.DictReader(f,fieldnames=fieldnames)
             writer.writeheader()
             writer.writerow({})
@@ -194,31 +208,80 @@ class Import_Csv_File(object):
             return self.liste_values #retourne une liste de dictionnaire contenant les elements
                                    
 #print( type(Import_Fichier("file.json").importer()))
-t0 = Import_Csv_File("Test_Fichier_Upload_KFK_1.csv").importer()
-o=Ecriture_Comptable(t0[100])
+t = Import_Csv_File("test_import.csv").importer()
+#o=Ecriture_Comptable(t0[42])
 #print(o.si_compte_tiers_correspond())
-#o.valider()
+#print(o.valider())
 #print ("OK")
-
-if o.si_renseigner() and o.si_montant_est_correcte() and o.verifier_correspondance():
+#print (len(t0))
+###if o.si_renseigner() and o.si_montant_est_correcte() and o.verifier_correspondance():
     
-    if o.si_valeur_est_positive():
-        if o.si_compte_tiers():
-            print("compte tiers")
-            o.valider()
+#    if o.si_valeur_est_positive():
+#        if o.si_compte_tiers():
+#            print("compte tiers")
+#            o.valider()
+#            print(o.ligne_retourne)
+#        else:
+#            print("pas de compte tiers")
+#            o.valider()
+#            print(o.ligne_retourne)
+#    else:
+#        print("pas de valeur negative")
+#
+def  ecriture():    
+    liste=[]
+    for i in range(len(t)):
+        liste.append(Ecriture_Comptable(t[i]).valider())
+    return liste
+liste=ecriture()
+print(len(ecriture()))
+print(type(ecriture()))
+#for i in ecriture():
+#   if i['N de piéce'] is not '':
+#        print(i['N de piéce'])
+def update_(liste):
+    dico=dict()
+    liste_=[]
+    for i in liste :
+        for k,v in i.items():
+            if k is 'Date':
+                i.update({'period':v[3:]})
+        liste_.append(i)
+    return liste_
+
+update_(ecriture())
+#for i in  ecriture():
+#    print (i['Date'][3:])
+def regrouper_ecriture(liste):
+    x=[]
+    y=[]
+    i=0
+    for row in liste:
+        print(row['N de piéce'])
+    #for i in set(y):
+    #    x.append([a for a in liste if a['N de piéce']==i])
+    #return y
+
+#groupe = regrouper_ecriture(liste)
+#print(type(groupe))
+#print(groupe)
+#copy_groupe = groupe
+#print (len(copy_groupe))
+#print (len(copy_groupe[1]))
+#print (copy_groupe[1])
+
+
+def balance(liste):
+    somme_credit=0
+    somme_debit=0
+    #D=[a for a in liste if a[' Montant Débit '] is not '']
+    #C=[a for a in liste if a[' Montant Crédit '] is not '']
+    #return C,D 
+    for element in liste:    
+        if element[' Montant Débit '] is not {'',0} :
+            somme_debit +=int(element[' Montant Débit '])
         else:
-            print("pas de compte tiers")
-            o.valider()
-    else:
-        print("pas de valeur negative")
+            somme_credit +=int(element[' Montant Crédit '])
+    return somme_credit,somme_debit
 
-        
-    
-
-
-
-    
-
-
-
-
+#print(balance(copy_groupe[0]))
