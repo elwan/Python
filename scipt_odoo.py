@@ -202,10 +202,11 @@ class Import_Csv_File(object):
             #self.dico={}
     def importer(self):
         with open(self.fichier,'r') as f:
-        # self.dico = csv.DictReader(f)
-            for row in csv.DictReader(f):
+            self.dico = csv.DictReader(f)
+            for row in self.dico:
                 self.liste_values.append(row)
-            return self.liste_values #retourne une liste de dictionnaire contenant les elements
+        
+        return self.liste_values #retourne une liste de dictionnaire contenant les elements
                                    
 #print( type(Import_Fichier("file.json").importer()))
 t = Import_Csv_File("test_import.csv").importer()
@@ -228,28 +229,30 @@ t = Import_Csv_File("test_import.csv").importer()
 #    else:
 #        print("pas de valeur negative")
 #
-def  ecriture():    
+def  ecriture(t):    
     liste=[]
-    for i in range(len(t)):
-        liste.append(Ecriture_Comptable(t[i]).valider())
+    for i in t:
+        liste.append(Ecriture_Comptable(i).valider())
     return liste
-liste=ecriture()
-print(len(ecriture()))
-print(type(ecriture()))
+l=ecriture(t)
+print(len(l))
+print(type(l))
+#print(t)
 #for i in ecriture():
 #   if i['N de piéce'] is not '':
 #        print(i['N de piéce'])
+#l=[{'c': 14, 'a': 7, 'd': 15}, {'c': 10, 'a': 7, 'd': 13}, {'c': 16, 'a': 7, 'd': 17}, {'c': 18, 'a': 7, 'd': 19}]
 def update_(liste):
     dico=dict()
     liste_=[]
-    for i in liste :
-        for k,v in i.items():
-            if k is 'Date':
-                i.update({'period':v[3:]})
-        liste_.append(i)
+    for i in liste:
+        if i is not None:
+            i.update({'period':i['Date'][3:]})
+            liste_.append(i)
     return liste_
 
-update_(ecriture())
+print(update_(l))
+
 #for i in  ecriture():
 #    print (i['Date'][3:])
 def regrouper_ecriture(liste):
