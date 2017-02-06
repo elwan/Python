@@ -1,4 +1,3 @@
-###################
 # Supprimer les anciens fichiers .dat et garder les n plus rescents
 
 import os
@@ -9,10 +8,15 @@ nombre_fichier_recent = 5
 
 os.chdir(path)
 fichiers = sorted(os.listdir(os.getcwd()), key=os.path.getmtime)
+fichiers_dat = []
 #anciens= files[0]
-nouveau = files[-nombre_fichier_recent:]
-file_to_delete = files
-for r in nouveau:
+for element in fichiers:
+    if element.endswith('.dat'):  # rechercher les fichiers terminant par .dat
+        fichiers_dat.append(element)
+
+liste_nouveau = fichiers_dat[-nombre_fichier_recent:]  # lister les n nouveau fichier par date de derniere modification
+file_to_delete = fichiers_dat
+for r in liste_nouveau:
     file_to_delete.remove(r)
 if file_to_delete:
     for i in file_to_delete:
